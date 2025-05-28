@@ -8,8 +8,13 @@ export const uploadVehicleImage = async (file: File, vehicleId: string): Promise
     const timestamp = Date.now();
     const fileName = `${timestamp}_${file.name}`;
     
-    // Store in vehicles directory in Firebase Storage
-    const storageRef = ref(storage, `vehicles/${vehicleId}/${fileName}`);
+    // Determine the storage path based on whether it's a temporary ID or not
+    const storagePath = vehicleId.startsWith('temp_')
+      ? `vehicles/temp/${vehicleId}/${fileName}`
+      : `vehicles/${vehicleId}/${fileName}`;
+    
+    // Store in Firebase Storage
+    const storageRef = ref(storage, storagePath);
     
     // Upload the file
     const snapshot = await uploadBytes(storageRef, file);
@@ -37,7 +42,13 @@ export const uploadVehicleImages = async (files: File[], vehicleId: string): Pro
     const uploadPromises = files.map(async (file) => {
       const timestamp = Date.now();
       const fileName = `${timestamp}_${file.name}`;
-      const storageRef = ref(storage, `vehicles/${vehicleId}/${fileName}`);
+      
+      // Determine the storage path based on whether it's a temporary ID or not
+      const storagePath = vehicleId.startsWith('temp_')
+        ? `vehicles/temp/${vehicleId}/${fileName}`
+        : `vehicles/${vehicleId}/${fileName}`;
+      
+      const storageRef = ref(storage, storagePath);
       
       const snapshot = await uploadBytes(storageRef, file);
       return getDownloadURL(snapshot.ref);

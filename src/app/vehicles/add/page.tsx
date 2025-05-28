@@ -13,7 +13,31 @@ export default function AddVehiclePage() {
   const handleSubmit = async (vehicle: Omit<Vehicle, 'id'>) => {
     try {
       setError(null);
-      const newId = await addVehicle(vehicle);
+      // Crear un nuevo ID temporal para el vehículo
+      const tempId = `temp_${Date.now()}`;
+      
+      // Mover las imágenes de la carpeta temporal a la carpeta permanente
+      const imageUrls = vehicle.imageUrls || [];
+      const permanentImageUrls = await Promise.all(
+        imageUrls.map(async (url) => {
+          if (url.includes('/temp/')) {
+            // Obtener el nombre del archivo de la URL
+            const fileName = url.split('/').pop()?.split('?')[0] || '';
+            // Crear una nueva referencia en la carpeta permanente
+            const newUrl = url.replace('/temp/', '/');
+            return newUrl;
+          }
+          return url;
+        })
+      );
+
+      // Actualizar el vehículo con las URLs permanentes
+      const vehicleData = {
+        ...vehicle,
+        imageUrls: permanentImageUrls
+      };
+
+      const newId = await addVehicle(vehicleData);
       router.push(`/vehicles/${newId}`);
     } catch (err) {
       console.error('Error adding vehicle:', err);

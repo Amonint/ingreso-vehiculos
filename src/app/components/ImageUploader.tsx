@@ -2,8 +2,10 @@
 
 import { useState } from 'react';
 import { uploadImage } from '../services/uploadImage';
+import { useRequireAuth } from '../hooks/useRequireAuth';
 
 export const ImageUploader = () => {
+  useRequireAuth();
   const [uploading, setUploading] = useState(false);
   const [imageUrl, setImageUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);

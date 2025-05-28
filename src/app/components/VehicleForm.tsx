@@ -6,6 +6,7 @@ import { Vehicle } from '../vehicles/types/Vehicle';
 import { uploadVehicleImage } from '../vehicles/services/vehicleImageService';
 import { VehicleImageUploader } from '../vehicles/components/VehicleImageUploader';
 import { PdfUploader } from '../vehicles/components/PdfUploader';
+import { useRequireAuth } from '../hooks/useRequireAuth';
 
 interface VehicleFormProps {
   vehicle?: Vehicle;
@@ -91,6 +92,7 @@ const colorOptions = [
 ];
 
 export default function VehicleForm({ vehicle, onSubmit, isEditMode = false }: VehicleFormProps) {
+  useRequireAuth();
   const [formData, setFormData] = useState<Omit<Vehicle, 'id'>>(initialVehicle);
   const [files, setFiles] = useState<File[]>([]);
   const [isLoading, setIsLoading] = useState(false);
@@ -230,7 +232,7 @@ export default function VehicleForm({ vehicle, onSubmit, isEditMode = false }: V
         setFormData(prev => ({
           ...prev,
           [section]: {
-            ...prev[section as keyof typeof prev],
+            ...(typeof prev[section as keyof typeof prev] === 'object' ? prev[section as keyof typeof prev] as Record<string, any> : {}),
             [field]: value
           }
         }));
@@ -238,16 +240,21 @@ export default function VehicleForm({ vehicle, onSubmit, isEditMode = false }: V
         // Manejo de campos anidados como especificaciones.motor.principal
         const [section, subsection, field] = parts;
         
-        setFormData(prev => ({
-          ...prev,
-          [section]: {
-            ...prev[section as keyof typeof prev],
-            [subsection]: {
-              ...prev[section as keyof typeof prev][subsection as keyof typeof prev[keyof typeof prev]],
-              [field]: value
+        setFormData(prev => {
+          const sectionValue = prev[section as keyof typeof prev] as Record<string, any>;
+          const subsectionValue = typeof sectionValue === 'object' ? sectionValue?.[subsection] : {};
+          
+          return {
+            ...prev,
+            [section]: {
+              ...(typeof sectionValue === 'object' ? sectionValue : {}),
+              [subsection]: {
+                ...(typeof subsectionValue === 'object' ? subsectionValue : {}),
+                [field]: value
+              }
             }
-          }
-        }));
+          };
+        });
       }
     } else {
       setFormData(prev => ({
@@ -582,23 +589,7 @@ export default function VehicleForm({ vehicle, onSubmit, isEditMode = false }: V
               />
             </div>
 
-            <div>
-              <label htmlFor="precio" className="block text-sm font-medium text-gray-700 mb-1">Precio</label>
-              <div className="relative">
-                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
-                <input
-                  type="number"
-                  id="precio"
-                  name="precio"
-                  value={formData.precio}
-                  onChange={handleInputChange}
-                  className="w-full pl-8 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  min="0"
-                  step="0.01"
-                  required
-                />
-              </div>
-            </div>
+            
           </div>
           
           <div className="mt-4">
@@ -1102,17 +1093,49 @@ export default function VehicleForm({ vehicle, onSubmit, isEditMode = false }: V
               <div key={color.value} className="flex items-center">
                 <input
                   type="checkbox"
-                  id={`${color.value}`}
+                  id={`color_${color.value}`}
+                  value={color.value}
                   checked={formData.coloresDisponibles.includes(color.value)}
-                  onChange={(e) => handleColorChange(e.target.value)}
+                  onChange={() => handleColorChange(color.value)}
                   className="h-4 w-4 text-blue-600"
                 />
-                <label htmlFor={`${color.value}`} className="ml-2 text-sm font-medium text-gray-900">
+                <label htmlFor={`color_${color.value}`} className="ml-2 text-sm font-medium text-gray-900 flex items-center">
+                  <span 
+                    className="w-4 h-4 rounded-full inline-block mr-2" 
+                    style={{ backgroundColor: color.value, border: '1px solid #e5e7eb' }}
+                  />
                   {color.name}
                 </label>
               </div>
             ))}
           </div>
+          
+          {/* Mostrar colores seleccionados */}
+          {formData.coloresDisponibles.length > 0 && (
+            <div className="mt-4">
+              <p className="text-sm font-medium text-gray-700 mb-2">Colores seleccionados:</p>
+              <div className="flex flex-wrap gap-2">
+                {formData.coloresDisponibles.map((color, index) => (
+                  <div key={index} className="flex items-center bg-gray-100 rounded-full px-3 py-1">
+                    <span 
+                      className="w-4 h-4 rounded-full inline-block mr-2" 
+                      style={{ backgroundColor: color, border: '1px solid #e5e7eb' }}
+                    />
+                    <span className="text-sm text-gray-700">{color}</span>
+                    <button
+                      type="button"
+                      onClick={() => handleColorChange(color)}
+                      className="ml-2 text-gray-500 hover:text-red-500"
+                    >
+                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                      </svg>
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Botones de acción */}

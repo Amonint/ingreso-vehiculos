@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { Vehicle } from '../types/vehicle';
+import { useRequireAuth } from '../hooks/useRequireAuth';
 
 interface VehicleDetailProps {
   vehicle: Vehicle;
@@ -10,6 +11,7 @@ interface VehicleDetailProps {
 }
 
 export default function VehicleDetail({ vehicle, onDelete }: VehicleDetailProps) {
+  useRequireAuth();
   const [isDeleting, setIsDeleting] = useState(false);
   const [showConfirm, setShowConfirm] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
@@ -158,7 +160,7 @@ export default function VehicleDetail({ vehicle, onDelete }: VehicleDetailProps)
                 <div className="mt-3 pt-3 border-t border-gray-200">
                   <h4 className="text-sm font-medium text-gray-600 mb-2">Características adicionales:</h4>
                   <ul className="space-y-1">
-                    {vehicle.especificaciones.motor.adicionales.map((valor, index) => (
+                    {vehicle.especificaciones.motor.adicionales?.map((valor, index) => (
                       <li key={`motor_${index}`} className="text-gray-700">
                         {valor}
                       </li>
@@ -179,7 +181,7 @@ export default function VehicleDetail({ vehicle, onDelete }: VehicleDetailProps)
                 <div className="mt-3 pt-3 border-t border-gray-200">
                   <h4 className="text-sm font-medium text-gray-600 mb-2">Características adicionales:</h4>
                   <ul className="space-y-1">
-                    {vehicle.especificaciones.transmision.adicionales.map((valor, index) => (
+                    {vehicle.especificaciones.transmision.adicionales?.map((valor, index) => (
                       <li key={`transmision_${index}`} className="text-gray-700">
                         {valor}
                       </li>
@@ -200,7 +202,7 @@ export default function VehicleDetail({ vehicle, onDelete }: VehicleDetailProps)
                 <div className="mt-3 pt-3 border-t border-gray-200">
                   <h4 className="text-sm font-medium text-gray-600 mb-2">Características adicionales:</h4>
                   <ul className="space-y-1">
-                    {vehicle.especificaciones.consumo.adicionales.map((valor, index) => (
+                    {vehicle.especificaciones.consumo.adicionales?.map((valor, index) => (
                       <li key={`consumo_${index}`} className="text-gray-700">
                         {valor}
                       </li>
@@ -221,7 +223,7 @@ export default function VehicleDetail({ vehicle, onDelete }: VehicleDetailProps)
                 <div className="mt-3 pt-3 border-t border-gray-200">
                   <h4 className="text-sm font-medium text-gray-600 mb-2">Características adicionales:</h4>
                   <ul className="space-y-1">
-                    {vehicle.especificaciones.potencia.adicionales.map((valor, index) => (
+                    {vehicle.especificaciones.potencia.adicionales?.map((valor, index) => (
                       <li key={`potencia_${index}`} className="text-gray-700">
                         {valor}
                       </li>
@@ -248,7 +250,7 @@ export default function VehicleDetail({ vehicle, onDelete }: VehicleDetailProps)
                 <div className="mt-3 pt-3 border-t border-gray-200">
                   <h4 className="text-sm font-medium text-gray-600 mb-2">Características adicionales:</h4>
                   <ul className="space-y-1">
-                    {vehicle.caracteristicas.seguridad.adicionales.map((valor, index) => (
+                    {vehicle.caracteristicas.seguridad.adicionales?.map((valor, index) => (
                       <li key={`seguridad_${index}`} className="text-gray-700">
                         {valor}
                       </li>
@@ -269,7 +271,7 @@ export default function VehicleDetail({ vehicle, onDelete }: VehicleDetailProps)
                 <div className="mt-3 pt-3 border-t border-gray-200">
                   <h4 className="text-sm font-medium text-gray-600 mb-2">Características adicionales:</h4>
                   <ul className="space-y-1">
-                    {vehicle.caracteristicas.confort.adicionales.map((valor, index) => (
+                    {vehicle.caracteristicas.confort.adicionales?.map((valor, index) => (
                       <li key={`confort_${index}`} className="text-gray-700">
                         {valor}
                       </li>
@@ -290,7 +292,7 @@ export default function VehicleDetail({ vehicle, onDelete }: VehicleDetailProps)
                 <div className="mt-3 pt-3 border-t border-gray-200">
                   <h4 className="text-sm font-medium text-gray-600 mb-2">Características adicionales:</h4>
                   <ul className="space-y-1">
-                    {vehicle.caracteristicas.exterior.adicionales.map((valor, index) => (
+                    {vehicle.caracteristicas.exterior.adicionales?.map((valor, index) => (
                       <li key={`exterior_${index}`} className="text-gray-700">
                         {valor}
                       </li>

@@ -29,25 +29,14 @@ export const getVehicleById = async (id: string): Promise<Vehicle | null> => {
 };
 
 // Add a new vehicle
-export const addVehicle = async (vehicle: Omit<Vehicle, 'id'>, files: File[]): Promise<string> => {
+export const addVehicle = async (vehicle: Omit<Vehicle, 'id'>): Promise<string> => {
   try {
-    // Initialize image URLs array
-    const imageUrls: string[] = [];
-    
-    // Upload images if any
-    if (files && files.length > 0) {
-      for (const file of files) {
-        const fileRef = ref(storage, `vehicles/${Date.now()}_${file.name}`);
-        const snapshot = await uploadBytes(fileRef, file);
-        const downloadURL = await getDownloadURL(snapshot.ref);
-        imageUrls.push(downloadURL);
-      }
-    }
-    
     // Prepare the structure for Firestore
     const vehicleData = {
       ...vehicle,
-      imageUrls,
+      imageUrls: vehicle.imageUrls || [],
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
       // Ensure the specifications and characteristics structure is correct
       especificaciones: {
         motor: {
@@ -85,6 +74,28 @@ export const addVehicle = async (vehicle: Omit<Vehicle, 'id'>, files: File[]): P
     
     // Add vehicle to Firestore
     const docRef = await addDoc(collection(db, VEHICLES_COLLECTION), vehicleData);
+
+    // Mover las imágenes de la carpeta temporal a la permanente si es necesario
+    if (vehicle.imageUrls && vehicle.imageUrls.length > 0) {
+      const permanentImageUrls = await Promise.all(
+        vehicle.imageUrls.map(async (url) => {
+          if (url.includes('/temp/')) {
+            // Obtener el nombre del archivo de la URL
+            const fileName = url.split('/').pop()?.split('?')[0] || '';
+            // Crear una nueva referencia en la carpeta permanente
+            const newUrl = url.replace('/temp/', '/');
+            return newUrl;
+          }
+          return url;
+        })
+      );
+
+      // Actualizar el documento con las URLs permanentes
+      await updateDoc(docRef, {
+        imageUrls: permanentImageUrls
+      });
+    }
+
     return docRef.id;
   } catch (error) {
     console.error("Error adding vehicle:", error);
@@ -93,7 +104,7 @@ export const addVehicle = async (vehicle: Omit<Vehicle, 'id'>, files: File[]): P
 };
 
 // Update an existing vehicle
-export const updateVehicle = async (id: string, updatedVehicle: Partial<Vehicle>, files?: File[]): Promise<void> => {
+export const updateVehicle = async (id: string, updatedVehicle: Partial<Vehicle>): Promise<void> => {
   try {
     const docRef = doc(db, VEHICLES_COLLECTION, id);
     
@@ -104,22 +115,12 @@ export const updateVehicle = async (id: string, updatedVehicle: Partial<Vehicle>
     }
     
     const currentVehicle = vehicleDoc.data() as Vehicle;
-    let imageUrls = currentVehicle.imageUrls || [];
-    
-    // Upload new images if any
-    if (files && files.length > 0) {
-      for (const file of files) {
-        const fileRef = ref(storage, `vehicles/${Date.now()}_${file.name}`);
-        const snapshot = await uploadBytes(fileRef, file);
-        const downloadURL = await getDownloadURL(snapshot.ref);
-        imageUrls.push(downloadURL);
-      }
-    }
     
     // Build the object with changes normalizing the structure
     const vehicleData = {
       ...updatedVehicle,
-      imageUrls,
+      updatedAt: Date.now(),
+      imageUrls: updatedVehicle.imageUrls || currentVehicle.imageUrls || [],
       // Ensure nested structures are correct
       especificaciones: {
         motor: {
