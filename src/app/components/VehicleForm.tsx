@@ -1,8 +1,11 @@
 'use client';
 
+import React from 'react';
 import { useState, useEffect, ChangeEvent, FormEvent } from 'react';
-import { Vehicle } from '../types/vehicle';
-import { uploadVehicleImage } from '../services/vehicleService';
+import { Vehicle } from '../vehicles/types/Vehicle';
+import { uploadVehicleImage } from '../vehicles/services/vehicleImageService';
+import { VehicleImageUploader } from '../vehicles/components/VehicleImageUploader';
+import { PdfUploader } from '../vehicles/components/PdfUploader';
 
 interface VehicleFormProps {
   vehicle?: Vehicle;
@@ -35,37 +38,39 @@ const initialVehicle: Omit<Vehicle, 'id'> = {
   año: '',
   tipoVehiculo: '',
   descripcion: '',
+  precio: 0,
+  fichaTecnicaUrl: '',
   imageUrls: [],
   especificaciones: {
     motor: {
       principal: '',
-      adicionales: {}
+      adicionales: []
     },
     transmision: {
       principal: '',
-      adicionales: {}
+      adicionales: []
     },
     consumo: {
       principal: '',
-      adicionales: {}
+      adicionales: []
     },
     potencia: {
       principal: '',
-      adicionales: {}
+      adicionales: []
     }
   },
   caracteristicas: {
     seguridad: {
       principal: '',
-      adicionales: {}
+      adicionales: []
     },
     confort: {
       principal: '',
-      adicionales: {}
+      adicionales: []
     },
     exterior: {
       principal: '',
-      adicionales: {}
+      adicionales: []
     }
   },
   coloresDisponibles: []
@@ -88,9 +93,15 @@ const colorOptions = [
 export default function VehicleForm({ vehicle, onSubmit, isEditMode = false }: VehicleFormProps) {
   const [formData, setFormData] = useState<Omit<Vehicle, 'id'>>(initialVehicle);
   const [files, setFiles] = useState<File[]>([]);
-  const [previews, setPreviews] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+
+  const handlePdfUpload = (url: string) => {
+    setFormData(prev => ({
+      ...prev,
+      fichaTecnicaUrl: url
+    }));
+  };
   
   // Estado para campos adicionales de especificaciones agrupados por categoría
   const [camposEspecificaciones, setCamposEspecificaciones] = useState<CamposAdicionalesPorCategoria>({
@@ -112,7 +123,6 @@ export default function VehicleForm({ vehicle, onSubmit, isEditMode = false }: V
   useEffect(() => {
     if (vehicle) {
       setFormData(vehicle);
-      setPreviews(vehicle.imageUrls || []);
       
       // Convertir campos adicionales de array a array para el formulario
       // Especificaciones
@@ -364,30 +374,11 @@ export default function VehicleForm({ vehicle, onSubmit, isEditMode = false }: V
     }
   };
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files) {
-      const selectedFiles = Array.from(e.target.files);
-      setFiles(prev => [...prev, ...selectedFiles]);
-      
-      // Create previews
-      selectedFiles.forEach(file => {
-        const reader = new FileReader();
-        reader.onloadend = () => {
-          setPreviews(prev => [...prev, reader.result as string]);
-        };
-        reader.readAsDataURL(file);
-      });
-    }
-  };
-
-  const removePreview = (index: number) => {
-    // Only remove from previews and files if it's a new uploaded file
-    if (index >= (formData.imageUrls?.length || 0)) {
-      const fileIndex = index - (formData.imageUrls?.length || 0);
-      setFiles(prev => prev.filter((_, i) => i !== fileIndex));
-    }
-    
-    setPreviews(prev => prev.filter((_, i) => i !== index));
+  const handleImageUpload = (urls: string[]) => {
+    setFormData(prev => ({
+      ...prev,
+      imageUrls: urls
+    }));
   };
 
   const handleSubmit = async (e: FormEvent) => {
@@ -486,45 +477,19 @@ export default function VehicleForm({ vehicle, onSubmit, isEditMode = false }: V
       const formDataActualizado = {
         ...formData,
         especificaciones: especificacionesActualizadas,
-        caracteristicas: caracteristicasActualizadas
+        caracteristicas: caracteristicasActualizadas,
+        imageUrls: formData.imageUrls || [],
+        fichaTecnicaUrl: formData.fichaTecnicaUrl || ''
       };
       
-      // If we have a vehicle ID (for edit mode), use it, otherwise use a temporary ID
-      const tempVehicleId = vehicle?.id || `temp_${Date.now()}`;
-      let imageUrls = [...(formData.imageUrls || [])];
-      
-      // Upload new images
-      if (files.length > 0) {
-        const totalFiles = files.length;
-        for (let i = 0; i < totalFiles; i++) {
-          const url = await uploadVehicleImage(files[i], tempVehicleId);
-          imageUrls.push(url);
-          setUploadProgress(Math.round(((i + 1) / totalFiles) * 100));
-        }
-      }
-      
-      // Submit the form with all image URLs
-      await onSubmit({
-        ...formDataActualizado,
-        imageUrls
-      });
+      // Submit the form
+      await onSubmit(formDataActualizado);
       
       // Reset form if not in edit mode
       if (!isEditMode) {
         setFormData(initialVehicle);
         setFiles([]);
-        setPreviews([]);
-        setCamposEspecificaciones({
-          motor: [],
-          transmision: [],
-          consumo: [],
-          potencia: []
-        });
-        setCamposCaracteristicas({
-          seguridad: [],
-          confort: [],
-          exterior: []
-        });
+        setUploadProgress(0);
       }
       
     } catch (error) {
@@ -538,7 +503,9 @@ export default function VehicleForm({ vehicle, onSubmit, isEditMode = false }: V
   return (
     <form onSubmit={handleSubmit} className="space-y-8 max-w-4xl mx-auto">
       <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">{isEditMode ? 'Editar Vehículo' : 'Agregar Nuevo Vehículo'}</h2>
+        <h2 className="text-2xl font-bold mb-6 text-gray-800">
+          {isEditMode ? 'Editar Vehículo' : 'Agregar Nuevo Vehículo'}
+        </h2>
         
         {/* Información General */}
         <div className="mb-8">
@@ -582,6 +549,24 @@ export default function VehicleForm({ vehicle, onSubmit, isEditMode = false }: V
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
               />
             </div>
+
+            <div>
+              <label htmlFor="precio" className="block text-sm font-medium text-gray-700 mb-1">Precio</label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
+                <input
+                  type="number"
+                  id="precio"
+                  name="precio"
+                  value={formData.precio}
+                  onChange={handleInputChange}
+                  className="w-full pl-8 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  min="0"
+                  step="0.01"
+                  required
+                />
+              </div>
+            </div>
             
             <div>
               <label htmlFor="tipoVehiculo" className="block text-sm font-medium text-gray-700 mb-1">Tipo de Vehículo</label>
@@ -595,6 +580,24 @@ export default function VehicleForm({ vehicle, onSubmit, isEditMode = false }: V
                 className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                 placeholder="SUV, Sedán, Pickup, etc."
               />
+            </div>
+
+            <div>
+              <label htmlFor="precio" className="block text-sm font-medium text-gray-700 mb-1">Precio</label>
+              <div className="relative">
+                <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-500">$</span>
+                <input
+                  type="number"
+                  id="precio"
+                  name="precio"
+                  value={formData.precio}
+                  onChange={handleInputChange}
+                  className="w-full pl-8 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  min="0"
+                  step="0.01"
+                  required
+                />
+              </div>
             </div>
           </div>
           
@@ -611,49 +614,26 @@ export default function VehicleForm({ vehicle, onSubmit, isEditMode = false }: V
             />
           </div>
         </div>
+
+        {/* Ficha Técnica */}
+        <div className="mb-8">
+          <h3 className="text-xl font-semibold mb-4 text-gray-700">Ficha Técnica (PDF)</h3>
+          <PdfUploader
+            vehicleId={vehicle?.id || `temp_${Date.now()}`}
+            currentPdfUrl={formData.fichaTecnicaUrl}
+            onPdfUploaded={handlePdfUpload}
+          />
+        </div>
         
         {/* Imágenes */}
         <div className="mb-8">
           <h3 className="text-xl font-semibold mb-4 text-gray-700">Imágenes</h3>
-          <div className="flex flex-col space-y-4">
-            <label className="flex justify-center items-center border-2 border-dashed border-gray-300 rounded-lg h-32 px-6 cursor-pointer bg-gray-50 hover:bg-gray-100">
-              <div className="text-center">
-                <div className="mt-2 flex flex-col items-center">
-                  <svg className="h-8 w-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                  </svg>
-                  <p className="mt-1 text-sm text-gray-600">Hacer clic para seleccionar imágenes</p>
-                </div>
-              </div>
-              <input type="file" className="hidden" multiple accept="image/*" onChange={handleFileChange} />
-            </label>
-            
-            {previews.length > 0 && (
-              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mt-4">
-                {previews.map((preview, index) => (
-                  <div key={index} className="relative rounded-lg overflow-hidden h-24 bg-gray-100">
-                    <img src={preview} alt={`Preview ${index}`} className="h-full w-full object-cover" />
-                    <button
-                      type="button"
-                      onClick={() => removePreview(index)}
-                      className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"
-                    >
-                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                      </svg>
-                    </button>
-                  </div>
-                ))}
-              </div>
-            )}
-            
-            {isLoading && uploadProgress > 0 && (
-              <div className="w-full bg-gray-200 rounded-full h-2.5 mt-2">
-                <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${uploadProgress}%` }}></div>
-                <p className="text-sm text-gray-600 mt-1">Subiendo imágenes: {uploadProgress}%</p>
-              </div>
-            )}
-          </div>
+          <VehicleImageUploader
+            vehicleId={vehicle?.id || `temp_${Date.now()}`}
+            multiple={true}
+            currentImages={formData.imageUrls}
+            onImagesUploaded={handleImageUpload}
+          />
         </div>
         
         {/* Especificaciones Técnicas */}
@@ -1122,52 +1102,21 @@ export default function VehicleForm({ vehicle, onSubmit, isEditMode = false }: V
               <div key={color.value} className="flex items-center">
                 <input
                   type="checkbox"
-                  id={`color-${color.value}`}
-                  checked={formData.coloresDisponibles?.includes(color.value) || false}
-                  onChange={() => handleColorChange(color.value)}
-                  className="h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                  id={`${color.value}`}
+                  checked={formData.coloresDisponibles.includes(color.value)}
+                  onChange={(e) => handleColorChange(e.target.value)}
+                  className="h-4 w-4 text-blue-600"
                 />
-                <label htmlFor={`color-${color.value}`} className="ml-2 block text-sm text-gray-900">
-                  <span 
-                    className="inline-block w-4 h-4 mr-2 rounded-full border border-gray-300" 
-                    style={{ backgroundColor: color.value }}
-                  ></span>
+                <label htmlFor={`${color.value}`} className="ml-2 text-sm font-medium text-gray-900">
                   {color.name}
                 </label>
               </div>
             ))}
           </div>
-          
-          {/* Mostrar colores seleccionados */}
-          {formData.coloresDisponibles.length > 0 && (
-            <div className="mt-4">
-              <p className="text-sm font-medium text-gray-700 mb-2">Colores seleccionados:</p>
-              <div className="flex flex-wrap gap-2">
-                {formData.coloresDisponibles.map(color => (
-                  <div key={color} className="flex items-center bg-gray-100 px-2 py-1 rounded-md">
-                    <span 
-                      className="inline-block w-4 h-4 mr-2 rounded-full border border-gray-300" 
-                      style={{ backgroundColor: color }}
-                    ></span>
-                    <span className="text-xs text-gray-700">{color}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleColorChange(color)}
-                      className="ml-2 text-gray-400 hover:text-red-500"
-                    >
-                      <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12"></path>
-                      </svg>
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
-        
+
         {/* Botones de acción */}
-        <div className="flex justify-end space-x-4">
+        <div className="flex justify-end space-x-4 mt-8">
           <button
             type="button"
             onClick={() => window.history.back()}
@@ -1186,4 +1135,4 @@ export default function VehicleForm({ vehicle, onSubmit, isEditMode = false }: V
       </div>
     </form>
   );
-} 
+}

@@ -4,13 +4,12 @@ import { getStorage } from "firebase/storage";
 import { getAnalytics } from "firebase/analytics";
 
 const firebaseConfig = {
-  apiKey: "AIzaSyAGi-8e7vv1Qcqhkt_P5k3NbarTcNRylgQ",
-  authDomain: "gomotors-5ddaf.firebaseapp.com",
-  projectId: "gomotors-5ddaf",
-  storageBucket: "gomotors-5ddaf.appspot.com",
-  messagingSenderId: "293919313265",
-  appId: "1:293919313265:web:17c8db51d42cfc2395bad0",
-  measurementId: "G-N8FRP7FPVR",
+  apiKey: "AIzaSyAYat3UCoDlPspPVqAyiS68UpCnmOGuNZU",
+  authDomain: "gomotors-web.firebaseapp.com",
+  projectId: "gomotors-web",
+  storageBucket: "gomotors-web.firebasestorage.app",
+  messagingSenderId: "548773429995",
+  appId: "1:548773429995:web:004f3736f3f1799804f4ae"
 };
 
 // Initialize Firebase
