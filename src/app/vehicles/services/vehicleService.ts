@@ -9,7 +9,7 @@ import {
   query,
   where
 } from 'firebase/firestore';
-import { db } from '../../firebase/config';
+import { db } from '../../../firebase/config';
 import { Vehicle } from '../types/Vehicle';
 
 const VEHICLES_COLLECTION = 'vehicles';

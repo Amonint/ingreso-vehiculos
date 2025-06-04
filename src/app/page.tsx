@@ -1,10 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getVehicles, deleteVehicle, deleteVehicleImage } from './services/vehicleService';
+import { getAllVehicles, deleteVehicle, deleteVehicleImage } from './services/vehicleService';
 import { Vehicle } from './types/vehicle';
 import { signInWithEmailAndPassword, User } from 'firebase/auth';
-import { auth } from './firebase/config';
+import { auth } from '../firebase/config';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
 import { useRequireAuth } from './hooks/useRequireAuth';

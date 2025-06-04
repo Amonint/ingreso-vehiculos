@@ -24,5 +24,9 @@ export interface Vehicle {
     potencia: FeatureSection;
     transmision: FeatureSection;
   };
-  imageUrls: string[]; // URLs de las imágenes
+  imagenBanner: string; // URL de la imagen del banner
+  imagenTarjeta: string; // URL de la imagen de la tarjeta
+  imagenGaleria: string[]; // URLs de las imágenes de la galería
+  createdAt?: number;
+  updatedAt?: number;
 } 

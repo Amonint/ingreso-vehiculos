@@ -30,7 +30,7 @@ export const VehiclesTable = ({ vehicles, onDelete }: VehiclesTableProps) => {
           </div>
           {vehicle.id && (
             <button
-              onClick={() => setSelectedVehicle(vehicle.id)}
+              onClick={() => vehicle.id && setSelectedVehicle(vehicle.id)}
               className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 flex items-center justify-center rounded transition-all duration-200"
             >
               <span className="text-white opacity-0 group-hover:opacity-100 text-xs">
@@ -52,7 +52,7 @@ export const VehiclesTable = ({ vehicles, onDelete }: VehiclesTableProps) => {
         />
         {vehicle.id && (
           <button
-            onClick={() => setSelectedVehicle(vehicle.id)}
+            onClick={() => vehicle.id && setSelectedVehicle(vehicle.id)}
             className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-30 flex items-center justify-center rounded transition-all duration-200"
           >
             <span className="text-white opacity-0 group-hover:opacity-100 text-xs">

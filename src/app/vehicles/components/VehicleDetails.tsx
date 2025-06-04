@@ -10,7 +10,7 @@ interface VehicleDetailsProps {
 
 export const VehicleDetails = ({ vehicle, className = '' }: VehicleDetailsProps) => {
   const [selectedImage, setSelectedImage] = useState<string | null>(
-    vehicle.imagenes && vehicle.imagenes.length > 0 ? vehicle.imagenes[0] : null
+    vehicle.imageUrls && vehicle.imageUrls.length > 0 ? vehicle.imageUrls[0] : null
   );
 
   const renderFeatureSection = (section: { principal: string; adicionales: string[] }) => (
@@ -31,17 +31,17 @@ export const VehicleDetails = ({ vehicle, className = '' }: VehicleDetailsProps)
   return (
     <div className={`bg-white rounded-lg shadow-lg p-6 ${className}`}>
       {/* Galería de imágenes */}
-      {vehicle.imagenes && vehicle.imagenes.length > 0 && (
+      {vehicle.imageUrls && vehicle.imageUrls.length > 0 && (
         <div className="mb-6">
           <div className="aspect-w-16 aspect-h-9 mb-4">
             <img
-              src={selectedImage || vehicle.imagenes[0]}
+              src={selectedImage || vehicle.imageUrls[0]}
               alt={`${vehicle.marca} ${vehicle.modelo}`}
               className="object-cover rounded-lg w-full h-full"
             />
           </div>
           <div className="grid grid-cols-4 gap-2">
-            {vehicle.imagenes.map((url, index) => (
+            {vehicle.imageUrls.map((url, index) => (
               <img
                 key={index}
                 src={url}

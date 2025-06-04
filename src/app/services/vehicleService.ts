@@ -1,19 +1,15 @@
 import { collection, addDoc, updateDoc, deleteDoc, doc, getDocs, getDoc, query, orderBy } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
-import { db, storage } from '../firebase/config';
+import { db, storage } from '../../firebase/config';
 import { Vehicle } from '../types/vehicle';
 
 const VEHICLES_COLLECTION = 'vehicles';
 
 // Get all vehicles
-export const getVehicles = async (): Promise<Vehicle[]> => {
-  const vehiclesQuery = query(collection(db, VEHICLES_COLLECTION), orderBy('createdAt', 'desc'));
-  const querySnapshot = await getDocs(vehiclesQuery);
-  
-  return querySnapshot.docs.map(doc => ({
-    id: doc.id,
-    ...doc.data()
-  })) as Vehicle[];
+export const getAllVehicles = async (): Promise<Vehicle[]> => {
+  const q = query(collection(db, VEHICLES_COLLECTION), orderBy('createdAt', 'desc'));
+  const querySnapshot = await getDocs(q);
+  return querySnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() } as Vehicle));
 };
 
 // Get a single vehicle by ID
@@ -34,10 +30,11 @@ export const addVehicle = async (vehicle: Omit<Vehicle, 'id'>): Promise<string> 
     // Prepare the structure for Firestore
     const vehicleData = {
       ...vehicle,
-      imageUrls: vehicle.imageUrls || [],
+      imagenBanner: vehicle.imagenBanner || '',
+      imagenTarjeta: vehicle.imagenTarjeta || '',
+      imagenGaleria: vehicle.imagenGaleria || [],
       createdAt: Date.now(),
       updatedAt: Date.now(),
-      // Ensure the specifications and characteristics structure is correct
       especificaciones: {
         motor: {
           principal: vehicle.especificaciones.motor.principal || "",
@@ -74,28 +71,6 @@ export const addVehicle = async (vehicle: Omit<Vehicle, 'id'>): Promise<string> 
     
     // Add vehicle to Firestore
     const docRef = await addDoc(collection(db, VEHICLES_COLLECTION), vehicleData);
-
-    // Mover las imágenes de la carpeta temporal a la permanente si es necesario
-    if (vehicle.imageUrls && vehicle.imageUrls.length > 0) {
-      const permanentImageUrls = await Promise.all(
-        vehicle.imageUrls.map(async (url) => {
-          if (url.includes('/temp/')) {
-            // Obtener el nombre del archivo de la URL
-            const fileName = url.split('/').pop()?.split('?')[0] || '';
-            // Crear una nueva referencia en la carpeta permanente
-            const newUrl = url.replace('/temp/', '/');
-            return newUrl;
-          }
-          return url;
-        })
-      );
-
-      // Actualizar el documento con las URLs permanentes
-      await updateDoc(docRef, {
-        imageUrls: permanentImageUrls
-      });
-    }
-
     return docRef.id;
   } catch (error) {
     console.error("Error adding vehicle:", error);
@@ -120,8 +95,9 @@ export const updateVehicle = async (id: string, updatedVehicle: Partial<Vehicle>
     const vehicleData = {
       ...updatedVehicle,
       updatedAt: Date.now(),
-      imageUrls: updatedVehicle.imageUrls || currentVehicle.imageUrls || [],
-      // Ensure nested structures are correct
+      imagenBanner: updatedVehicle.imagenBanner || currentVehicle.imagenBanner || '',
+      imagenTarjeta: updatedVehicle.imagenTarjeta || currentVehicle.imagenTarjeta || '',
+      imagenGaleria: updatedVehicle.imagenGaleria || currentVehicle.imagenGaleria || [],
       especificaciones: {
         motor: {
           principal: updatedVehicle.especificaciones?.motor?.principal || currentVehicle.especificaciones?.motor?.principal || "",
@@ -177,19 +153,28 @@ export const deleteVehicle = async (id: string): Promise<void> => {
     
     const vehicle = vehicleDoc.data() as Vehicle;
     
-    // Delete images from Storage if any
-    if (vehicle.imageUrls && vehicle.imageUrls.length > 0) {
-      for (const imageUrl of vehicle.imageUrls) {
-        try {
-          // Extract the path from the URL
-          const fileRef = ref(storage, decodeURIComponent(imageUrl.split('?')[0].split('/o/')[1]));
-          await deleteObject(fileRef);
-        } catch (error) {
-          console.error("Error deleting image:", error);
-          // Continue with other images even if one fails
-        }
-      }
+    // Delete all images from Storage
+    const deleteImagePromises = [];
+
+    // Delete banner image
+    if (vehicle.imagenBanner) {
+      deleteImagePromises.push(deleteImageFromStorage(vehicle.imagenBanner));
     }
+
+    // Delete card image
+    if (vehicle.imagenTarjeta) {
+      deleteImagePromises.push(deleteImageFromStorage(vehicle.imagenTarjeta));
+    }
+
+    // Delete gallery images
+    if (vehicle.imagenGaleria && vehicle.imagenGaleria.length > 0) {
+      vehicle.imagenGaleria.forEach(imageUrl => {
+        deleteImagePromises.push(deleteImageFromStorage(imageUrl));
+      });
+    }
+
+    // Wait for all image deletions to complete
+    await Promise.all(deleteImagePromises);
     
     // Delete document from Firestore
     await deleteDoc(docRef);
@@ -199,53 +184,31 @@ export const deleteVehicle = async (id: string): Promise<void> => {
   }
 };
 
-// Delete a specific image from a vehicle
-export const deleteImage = async (vehicleId: string, imageUrl: string): Promise<void> => {
-  try {
-    const docRef = doc(db, VEHICLES_COLLECTION, vehicleId);
-    const vehicleDoc = await getDoc(docRef);
-    
-    if (!vehicleDoc.exists()) {
-      throw new Error(`Vehicle with ID ${vehicleId} not found`);
-    }
-    
-    const vehicle = vehicleDoc.data() as Vehicle;
-    
-    // Filter out the image URL to be deleted
-    const updatedImageUrls = vehicle.imageUrls?.filter(url => url !== imageUrl) || [];
-    
-    // Update document without the deleted image
-    await updateDoc(docRef, { imageUrls: updatedImageUrls });
-    
-    // Delete image from Storage
-    try {
-      // Extract the path from the URL
-      const fileRef = ref(storage, decodeURIComponent(imageUrl.split('?')[0].split('/o/')[1]));
-      await deleteObject(fileRef);
-    } catch (error) {
-      console.error("Error deleting image from storage:", error);
-      // Continue even if there's an error deleting the image
-    }
-  } catch (error) {
-    console.error(`Error deleting image from vehicle ${vehicleId}:`, error);
-    throw new Error(`Failed to delete image from vehicle ${vehicleId}`);
-  }
-};
-
 // Upload image to Firebase Storage
-export const uploadVehicleImage = async (file: File, vehicleId: string): Promise<string> => {
-  const storageRef = ref(storage, `vehicles/${vehicleId}/${file.name}_${Date.now()}`);
+export const uploadVehicleImage = async (file: File, vehicleId: string, type: 'banner' | 'tarjeta' | 'galeria'): Promise<string> => {
+  const storageRef = ref(storage, `vehicles/${vehicleId}/${type}/${file.name}_${Date.now()}`);
   await uploadBytes(storageRef, file);
   return getDownloadURL(storageRef);
 };
 
 // Delete image from Firebase Storage
 export const deleteVehicleImage = async (imageUrl: string): Promise<void> => {
-  // Extract the path from the URL
-  const imageRef = ref(storage, imageUrl);
   try {
+    const imageRef = ref(storage, decodeURIComponent(imageUrl.split('?')[0].split('/o/')[1]));
     await deleteObject(imageRef);
   } catch (error) {
     console.error('Error deleting image:', error);
+    throw error;
+  }
+};
+
+// Helper function to delete image from storage
+const deleteImageFromStorage = async (imageUrl: string): Promise<void> => {
+  try {
+    const imageRef = ref(storage, decodeURIComponent(imageUrl.split('?')[0].split('/o/')[1]));
+    await deleteObject(imageRef);
+  } catch (error) {
+    console.error("Error deleting image:", error);
+    // Continue with other images even if one fails
   }
 }; 

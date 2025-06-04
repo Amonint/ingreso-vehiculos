@@ -5,37 +5,41 @@ export interface Vehicle {
   año: string;
   tipoVehiculo: string;
   descripcion: string;
-  imageUrls: string[];
+  precio: number;
+  fichaTecnicaUrl?: string;
+  imagenBanner: string;
+  imagenTarjeta: string;
+  imagenGaleria: string[];
   especificaciones: {
     motor: {
       principal: string;
-      adicionales?: string[];
+      adicionales: string[];
     };
     transmision: {
       principal: string;
-      adicionales?: string[];
+      adicionales: string[];
     };
     consumo: {
       principal: string;
-      adicionales?: string[];
+      adicionales: string[];
     };
     potencia: {
       principal: string;
-      adicionales?: string[];
+      adicionales: string[];
     };
   };
   caracteristicas: {
     seguridad: {
       principal: string;
-      adicionales?: string[];
+      adicionales: string[];
     };
     confort: {
       principal: string;
-      adicionales?: string[];
+      adicionales: string[];
     };
     exterior: {
       principal: string;
-      adicionales?: string[];
+      adicionales: string[];
     };
   };
   coloresDisponibles: string[]; // colores en formato hexadecimal (#RRGGBB)

@@ -7,6 +7,8 @@ import { uploadVehicleImage } from '../vehicles/services/vehicleImageService';
 import { VehicleImageUploader } from '../vehicles/components/VehicleImageUploader';
 import { PdfUploader } from '../vehicles/components/PdfUploader';
 import { useRequireAuth } from '../hooks/useRequireAuth';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 interface VehicleFormProps {
   vehicle?: Vehicle;
@@ -41,7 +43,9 @@ const initialVehicle: Omit<Vehicle, 'id'> = {
   descripcion: '',
   precio: 0,
   fichaTecnicaUrl: '',
-  imageUrls: [],
+  imagenBanner: '',
+  imagenTarjeta: '',
+  imagenGaleria: [],
   especificaciones: {
     motor: {
       principal: '',
@@ -93,15 +97,66 @@ const colorOptions = [
 
 export default function VehicleForm({ vehicle, onSubmit, isEditMode = false }: VehicleFormProps) {
   useRequireAuth();
+  const router = useRouter();
   const [formData, setFormData] = useState<Omit<Vehicle, 'id'>>(initialVehicle);
-  const [files, setFiles] = useState<File[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
+
+  // Efecto para cargar imagenBanner
+  useEffect(() => {
+    if (vehicle?.imagenBanner) {
+      setFormData(prev => ({
+        ...prev,
+        imagenBanner: vehicle.imagenBanner
+      }));
+    }
+  }, [vehicle?.imagenBanner]);
+
+  // Efecto para cargar imagenTarjeta
+  useEffect(() => {
+    if (vehicle?.imagenTarjeta) {
+      setFormData(prev => ({
+        ...prev,
+        imagenTarjeta: vehicle.imagenTarjeta
+      }));
+    }
+  }, [vehicle?.imagenTarjeta]);
+
+  // Efecto para cargar imagenGaleria
+  useEffect(() => {
+    if (vehicle?.imagenGaleria && vehicle.imagenGaleria.length > 0) {
+      setFormData(prev => ({
+        ...prev,
+        imagenGaleria: vehicle.imagenGaleria
+      }));
+    }
+  }, [vehicle?.imagenGaleria]);
 
   const handlePdfUpload = (url: string) => {
     setFormData(prev => ({
       ...prev,
       fichaTecnicaUrl: url
+    }));
+  };
+
+  const handleBannerUpload = (url: string) => {
+    setFormData(prev => ({
+      ...prev,
+      imagenBanner: url
+    }));
+  };
+
+  const handleTarjetaUpload = (url: string) => {
+    setFormData(prev => ({
+      ...prev,
+      imagenTarjeta: url
+    }));
+  };
+
+  const handleGaleriaUpload = (urls: string[]) => {
+    setFormData(prev => ({
+      ...prev,
+      imagenGaleria: urls
     }));
   };
   
@@ -381,13 +436,6 @@ export default function VehicleForm({ vehicle, onSubmit, isEditMode = false }: V
     }
   };
 
-  const handleImageUpload = (urls: string[]) => {
-    setFormData(prev => ({
-      ...prev,
-      imageUrls: urls
-    }));
-  };
-
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -485,7 +533,9 @@ export default function VehicleForm({ vehicle, onSubmit, isEditMode = false }: V
         ...formData,
         especificaciones: especificacionesActualizadas,
         caracteristicas: caracteristicasActualizadas,
-        imageUrls: formData.imageUrls || [],
+        imagenBanner: formData.imagenBanner || '',
+        imagenTarjeta: formData.imagenTarjeta || '',
+        imagenGaleria: formData.imagenGaleria || [],
         fichaTecnicaUrl: formData.fichaTecnicaUrl || ''
       };
       
@@ -495,7 +545,6 @@ export default function VehicleForm({ vehicle, onSubmit, isEditMode = false }: V
       // Reset form if not in edit mode
       if (!isEditMode) {
         setFormData(initialVehicle);
-        setFiles([]);
         setUploadProgress(0);
       }
       
@@ -510,9 +559,25 @@ export default function VehicleForm({ vehicle, onSubmit, isEditMode = false }: V
   return (
     <form onSubmit={handleSubmit} className="space-y-8 max-w-4xl mx-auto">
       <div className="bg-white p-6 rounded-lg shadow">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">
-          {isEditMode ? 'Editar Vehículo' : 'Agregar Nuevo Vehículo'}
-        </h2>
+        <div className="flex justify-between items-center mb-6">
+          <h2 className="text-2xl font-bold text-gray-800">
+            {isEditMode ? 'Editar Vehículo' : 'Agregar Nuevo Vehículo'}
+          </h2>
+          <button
+            type="button"
+            onClick={() => router.push('/vehicles')}
+            className="flex items-center space-x-2 text-gray-600 hover:text-gray-800 transition-colors"
+          >
+            <Image
+              src="/logo.png"
+              alt="Go Motors"
+              width={40}
+              height={40}
+              className="object-contain"
+            />
+            <span className="text-sm font-medium">Volver a Vehículos</span>
+          </button>
+        </div>
         
         {/* Información General */}
         <div className="mb-8">
@@ -608,7 +673,7 @@ export default function VehicleForm({ vehicle, onSubmit, isEditMode = false }: V
 
         {/* Ficha Técnica */}
         <div className="mb-8">
-          <h3 className="text-xl font-semibold mb-4 text-gray-700">Ficha Técnica (PDF)</h3>
+          <h3 className="text-xl font-semibold mb-4 text-gray-700">Ficha Técnica (PDF52525)</h3>
           <PdfUploader
             vehicleId={vehicle?.id || `temp_${Date.now()}`}
             currentPdfUrl={formData.fichaTecnicaUrl}
@@ -619,12 +684,39 @@ export default function VehicleForm({ vehicle, onSubmit, isEditMode = false }: V
         {/* Imágenes */}
         <div className="mb-8">
           <h3 className="text-xl font-semibold mb-4 text-gray-700">Imágenes</h3>
-          <VehicleImageUploader
-            vehicleId={vehicle?.id || `temp_${Date.now()}`}
-            multiple={true}
-            currentImages={formData.imageUrls}
-            onImagesUploaded={handleImageUpload}
-          />
+          
+          {/* Imagen Banner */}
+          <div className="mb-6">
+            <h4 className="text-lg font-medium mb-2 text-gray-700">Imagen Banner</h4>
+            <VehicleImageUploader
+              vehicleId={vehicle?.id || `temp_${Date.now()}`}
+              multiple={false}
+              currentImages={formData.imagenBanner ? [formData.imagenBanner] : []}
+              onImagesUploaded={(urls) => handleBannerUpload(urls[0])}
+            />
+          </div>
+
+          {/* Imagen Tarjeta */}
+          <div className="mb-6">
+            <h4 className="text-lg font-medium mb-2 text-gray-700">Imagen Tarjeta</h4>
+            <VehicleImageUploader
+              vehicleId={vehicle?.id || `temp_${Date.now()}`}
+              multiple={false}
+              currentImages={formData.imagenTarjeta ? [formData.imagenTarjeta] : []}
+              onImagesUploaded={(urls) => handleTarjetaUpload(urls[0])}
+            />
+          </div>
+
+          {/* Imagen Galería */}
+          <div className="mb-6">
+            <h4 className="text-lg font-medium mb-2 text-gray-700">Galería de Imágenes</h4>
+            <VehicleImageUploader
+              vehicleId={vehicle?.id || `temp_${Date.now()}`}
+              multiple={true}
+              currentImages={formData.imagenGaleria}
+              onImagesUploaded={handleGaleriaUpload}
+            />
+          </div>
         </div>
         
         {/* Especificaciones Técnicas */}

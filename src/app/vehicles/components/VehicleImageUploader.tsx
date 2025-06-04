@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { uploadVehicleImage, uploadVehicleImages } from '../services/vehicleImageService';
 
 interface VehicleImageUploaderProps {
@@ -21,6 +21,10 @@ export const VehicleImageUploader = ({
   const [uploading, setUploading] = useState(false);
   const [imageUrls, setImageUrls] = useState<string[]>(currentImages);
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    setImageUrls(currentImages);
+  }, [currentImages]);
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -100,7 +104,7 @@ export const VehicleImageUploader = ({
       {imageUrls.length > 0 && (
         <div className="grid grid-cols-2 gap-4 mt-4">
           {imageUrls.map((url, index) => (
-            <div key={index} className="relative">
+            <div key={index} className="relative group">
               <img
                 src={url}
                 alt={`Imagen ${index + 1}`}

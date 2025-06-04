@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { auth } from '../firebase/config';
+import { auth } from '../../firebase/config';
 
 export function useRequireAuth() {
   const router = useRouter();

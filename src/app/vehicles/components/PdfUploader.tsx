@@ -1,8 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
-import { storage } from '../../firebase/config';
+import { storage } from '../../../firebase/config';
 
 interface PdfUploaderProps {
   vehicleId: string;
@@ -20,6 +20,10 @@ export const PdfUploader = ({
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [pdfUrl, setPdfUrl] = useState<string | undefined>(currentPdfUrl);
+
+  useEffect(() => {
+    setPdfUrl(currentPdfUrl);
+  }, [currentPdfUrl]);
 
   const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
