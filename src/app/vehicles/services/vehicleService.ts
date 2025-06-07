@@ -20,8 +20,8 @@ const transformVehicleDoc = (doc: any): Vehicle => {
   return {
     id: doc.id,
     ...data,
-    // Asegurarse de que imageUrls sea siempre un array
-    imageUrls: data.imageUrls || []
+    // Asegurarse de que imagenGaleria sea siempre un array
+    imagenGaleria: data.imagenGaleria || []
   } as Vehicle;
 };
 
@@ -52,10 +52,10 @@ export const getAllVehicles = async (): Promise<Vehicle[]> => {
 // Crear un nuevo vehículo
 export const createVehicle = async (vehicle: Omit<Vehicle, 'id'>): Promise<string> => {
   try {
-    // Asegurarse de que imageUrls sea un array si no está definido
+    // Asegurarse de que imagenGaleria sea un array si no está definido
     const vehicleData = {
       ...vehicle,
-      imageUrls: vehicle.imageUrls || []
+      imagenGaleria: vehicle.imagenGaleria || []
     };
     const docRef = await addDoc(collection(db, VEHICLES_COLLECTION), vehicleData);
     return docRef.id;

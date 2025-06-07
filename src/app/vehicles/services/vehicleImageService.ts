@@ -25,7 +25,7 @@ export const uploadVehicleImage = async (file: File, vehicleId: string): Promise
     // Solo actualizar el documento si no es un ID temporal
     if (!vehicleId.startsWith('temp_')) {
       await updateVehicle(vehicleId, {
-        imageUrls: [downloadURL]
+        imagenGaleria: [downloadURL]
       });
     }
     
@@ -59,7 +59,7 @@ export const uploadVehicleImages = async (files: File[], vehicleId: string): Pro
     // Solo actualizar el documento si no es un ID temporal
     if (!vehicleId.startsWith('temp_')) {
       await updateVehicle(vehicleId, {
-        imageUrls: urls
+        imagenGaleria: urls
       });
     }
 

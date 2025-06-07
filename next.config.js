@@ -5,8 +5,11 @@ const nextConfig = {
   output: 'export',
   images: {
     unoptimized: true,
+    domains: ['firebasestorage.googleapis.com'],
   },
   trailingSlash: true,
+  basePath: '',
+  assetPrefix: '/',
 }
 
 module.exports = nextConfig 

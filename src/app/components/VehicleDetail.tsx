@@ -30,20 +30,20 @@ export default function VehicleDetail({ vehicle, onDelete }: VehicleDetailProps)
   };
 
   const nextImage = () => {
-    if (vehicle.imageUrls && vehicle.imageUrls.length > 0) {
-      setCurrentImageIndex((currentImageIndex + 1) % vehicle.imageUrls.length);
+    if (vehicle.imagenGaleria && vehicle.imagenGaleria.length > 0) {
+      setCurrentImageIndex((currentImageIndex + 1) % vehicle.imagenGaleria.length);
     }
   };
 
   const prevImage = () => {
-    if (vehicle.imageUrls && vehicle.imageUrls.length > 0) {
-      setCurrentImageIndex((currentImageIndex - 1 + vehicle.imageUrls.length) % vehicle.imageUrls.length);
+    if (vehicle.imagenGaleria && vehicle.imagenGaleria.length > 0) {
+      setCurrentImageIndex((currentImageIndex - 1 + vehicle.imagenGaleria.length) % vehicle.imagenGaleria.length);
     }
   };
 
-  const currentImage = vehicle.imageUrls && vehicle.imageUrls.length > 0
-    ? vehicle.imageUrls[currentImageIndex]
-    : 'https://via.placeholder.com/800x500?text=Sin+Imagen';
+  const currentImage = vehicle.imagenGaleria && vehicle.imagenGaleria.length > 0
+    ? vehicle.imagenGaleria[currentImageIndex]
+    : vehicle.imagenBanner || '/no-image.png';
     
   // Helper function to check if hay campos adicionales
   const hasAdditionalFields = (category: any) => {
@@ -60,7 +60,7 @@ export default function VehicleDetail({ vehicle, onDelete }: VehicleDetailProps)
           className="w-full h-full object-cover"
         />
         
-        {vehicle.imageUrls && vehicle.imageUrls.length > 1 && (
+        {vehicle.imagenBanner && vehicle.imagenBanner.length > 1 && (
           <>
             <button 
               onClick={prevImage}
@@ -82,9 +82,9 @@ export default function VehicleDetail({ vehicle, onDelete }: VehicleDetailProps)
         )}
         
         {/* Thumbnails */}
-        {vehicle.imageUrls && vehicle.imageUrls.length > 1 && (
+        {vehicle.imagenGaleria && vehicle.imagenGaleria.length > 1 && (
           <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
-            {vehicle.imageUrls.map((img, index) => (
+            {vehicle.imagenGaleria.map((img: string, index: number) => (
               <button 
                 key={index} 
                 onClick={() => setCurrentImageIndex(index)}

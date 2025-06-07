@@ -38,8 +38,14 @@ export default function VehicleDetailClient({ id }: { id: string }) {
     
     try {
       // Delete the images first
-      if (vehicle.imageUrls && vehicle.imageUrls.length > 0) {
-        for (const imageUrl of vehicle.imageUrls) {
+      if (vehicle.imagenBanner) {
+        await deleteVehicleImage(vehicle.imagenBanner);
+      }
+      if (vehicle.imagenTarjeta) {
+        await deleteVehicleImage(vehicle.imagenTarjeta);
+      }
+      if (vehicle.imagenGaleria && vehicle.imagenGaleria.length > 0) {
+        for (const imageUrl of vehicle.imagenGaleria) {
           await deleteVehicleImage(imageUrl);
         }
       }

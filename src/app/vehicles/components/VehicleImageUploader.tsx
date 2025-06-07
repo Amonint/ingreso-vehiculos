@@ -110,7 +110,7 @@ export const VehicleImageUploader = ({
                 alt={`Imagen ${index + 1}`}
                 className="w-full h-32 object-cover rounded"
                 onError={(e) => {
-                  e.currentTarget.src = 'https://via.placeholder.com/200x150?text=Error+de+imagen';
+                  e.currentTarget.src = '/no-image.png';
                 }}
               />
               <button

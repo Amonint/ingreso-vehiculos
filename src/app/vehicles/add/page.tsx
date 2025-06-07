@@ -17,9 +17,9 @@ export default function AddVehiclePage() {
       const tempId = `temp_${Date.now()}`;
       
       // Mover las imágenes de la carpeta temporal a la carpeta permanente
-      const imageUrls = vehicle.imageUrls || [];
+      const imageUrls = vehicle.imagenGaleria || [];
       const permanentImageUrls = await Promise.all(
-        imageUrls.map(async (url) => {
+        imageUrls.map(async (url: string) => {
           if (url.includes('/temp/')) {
             // Obtener el nombre del archivo de la URL
             const fileName = url.split('/').pop()?.split('?')[0] || '';
@@ -34,7 +34,7 @@ export default function AddVehiclePage() {
       // Actualizar el vehículo con las URLs permanentes
       const vehicleData = {
         ...vehicle,
-        imageUrls: permanentImageUrls
+        imagenGaleria: permanentImageUrls
       };
 
       const newId = await addVehicle(vehicleData);

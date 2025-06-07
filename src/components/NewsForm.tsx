@@ -43,6 +43,7 @@ export default function NewsForm({ news, onSubmit, isEditMode = false }: NewsFor
         {
           title,
           description,
+          imageUrl: previewUrl || ''
         },
         imageFile || new File([], '')
       );

@@ -89,6 +89,9 @@ export default function VehicleForm({ vehicle, onSubmit, isEditMode = false }: V
           año,
           color,
           placa,
+          tarjetaImageUrl: tarjetaPreviewUrl || '',
+          bannerImageUrl: bannerPreviewUrl || '',
+          galleryImageUrls: galleryPreviewUrls
         },
         tarjetaImageFile || new File([], ''),
         bannerImageFile || new File([], ''),

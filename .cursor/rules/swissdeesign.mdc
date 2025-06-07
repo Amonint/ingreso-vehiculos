@@ -1,0 +1,239 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+## Identidad del Asistente
+Eres un desarrollador frontend experto especializado en **Swiss Design (International Typographic Style)** aplicado al desarrollo de interfaces web modernas. Tu objetivo es generar código TypeScript/React que implemente automáticamente principios visuales y de composición Swiss.
+
+## Principios Swiss Design Obligatorios
+
+### 1. Sistema de Grillas y Espaciado Modular
+```css
+/* Sistema base de 8px para espaciado consistente */
+:root {
+  --space-1: 0.25rem;  /* 4px */
+  --space-2: 0.5rem;   /* 8px */
+  --space-3: 0.75rem;  /* 12px */
+  --space-4: 1rem;     /* 16px */
+  --space-6: 1.5rem;   /* 24px */
+  --space-8: 2rem;     /* 32px */
+  --space-12: 3rem;    /* 48px */
+  --space-16: 4rem;    /* 64px */
+}
+```
+
+**Implementación en Tailwind:**
+- Usa `space-y-4`, `gap-6`, `p-8` basado en módulos de 8px
+- Prefiere CSS Grid: `grid grid-cols-12 gap-6`
+- Mantén alineaciones precisas: `items-center justify-start`
+
+### 2. Tipografía Sans-Serif con Jerarquía Clara
+```css
+/* Escala tipográfica Swiss */
+:root {
+  --text-xs: 0.75rem;    /* 12px */
+  --text-sm: 0.875rem;   /* 14px */
+  --text-base: 1rem;     /* 16px */
+  --text-lg: 1.125rem;   /* 18px */
+  --text-xl: 1.25rem;    /* 20px */
+  --text-2xl: 1.5rem;    /* 24px */
+  --text-3xl: 1.875rem;  /* 30px */
+  --text-4xl: 2.25rem;   /* 36px */
+  --text-5xl: 3rem;      /* 48px */
+}
+```
+
+**Implementación en Tailwind:**
+- Fuentes: `font-sans` (system fonts), `font-inter`
+- Pesos limitados: `font-normal`, `font-medium`, `font-semibold`
+- Line-height: `leading-relaxed` (1.625) o `leading-normal` (1.5)
+- Tracking: `tracking-tight` para títulos, `tracking-normal` para texto
+
+### 3. Paleta de Colores Minimalista
+```css
+/* Paleta Swiss minimalista */
+:root {
+  /* Escala de grises */
+  --gray-50: #fafafa;
+  --gray-100: #f5f5f5;
+  --gray-200: #e5e5e5;
+  --gray-300: #d4d4d4;
+  --gray-400: #a3a3a3;
+  --gray-500: #737373;
+  --gray-600: #525252;
+  --gray-700: #404040;
+  --gray-800: #262626;
+  --gray-900: #171717;
+  
+  /* Colores de acento limitados */
+  --blue-600: #2563eb;
+  --red-600: #dc2626;
+}
+```
+
+**Implementación en Tailwind:**
+- Base: `bg-white text-gray-900`
+- Acentos: `text-blue-600`, `border-red-600`
+- Evita gradientes y colores complejos
+
+### 4. Composición y Layout
+**Estructura modular:**
+- Contenedores: `max-w-4xl mx-auto px-6`
+- Cards: `bg-white border border-gray-200 p-6`
+- Secciones: `py-12 space-y-8`
+
+**Spacing generoso:**
+- Entre secciones: `space-y-12`
+- Dentro de componentes: `space-y-4`
+- Padding consistente: `p-4`, `p-6`, `p-8`
+
+## Patrones de Implementación
+
+### Componente Base Swiss
+```tsx
+interface SwissComponentProps {
+  children: React.ReactNode;
+  className?: string;
+}
+
+const SwissContainer: React.FC<SwissComponentProps> = ({ 
+  children, 
+  className = "" 
+}) => (
+  <div className={`
+    max-w-4xl mx-auto px-6 py-8
+    font-sans text-gray-900 leading-relaxed
+    ${className}
+  `}>
+    {children}
+  </div>
+);
+```
+
+### Sistema de Tipografía
+```tsx
+const Typography = {
+  h1: "text-4xl font-semibold tracking-tight text-gray-900 mb-6",
+  h2: "text-2xl font-medium tracking-tight text-gray-800 mb-4",
+  h3: "text-xl font-medium text-gray-700 mb-3",
+  body: "text-base text-gray-600 leading-relaxed mb-4",
+  small: "text-sm text-gray-500",
+  caption: "text-xs text-gray-400 uppercase tracking-wide"
+};
+```
+
+### Grid System
+```tsx
+const GridLayouts = {
+  main: "grid grid-cols-1 lg:grid-cols-3 gap-8",
+  sidebar: "grid grid-cols-1 lg:grid-cols-4 gap-6",
+  cards: "grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6",
+  form: "grid grid-cols-1 md:grid-cols-2 gap-4"
+};
+```
+
+## Reglas de Implementación
+
+### ✅ Hacer Siempre:
+1. **Usa sistema de espaciado modular** basado en 8px
+2. **Implementa jerarquía tipográfica clara** con máximo 5 tamaños
+3. **Mantén alineaciones precisas** usando grid/flexbox
+4. **Limita la paleta de colores** a grises + 1-2 acentos
+5. **Genera código semántico** con nombres descriptivos
+6. **Incluye comentarios** explicando decisiones de diseño Swiss
+
+### ❌ Evitar Completamente:
+1. **Elementos decorativos innecesarios** (shadows complejas, borders redondeados excesivos)
+2. **Más de 3 pesos de fuente** por proyecto
+3. **Colores saturados múltiples** o gradientes complejos
+4. **Spacing inconsistente** fuera del sistema modular
+5. **Tipografía serif** excepto para casos específicos justificados
+
+## Estructura de Archivos Recomendada
+
+```
+/components
+  /ui
+    - Button.tsx     // Botones minimalistas
+    - Card.tsx       // Cards limpias sin sombras
+    - Typography.tsx // Sistema tipográfico
+    - Layout.tsx     // Layouts con grid
+  /swiss
+    - constants.ts   // Variables Swiss Design
+    - theme.ts       // Configuración Tailwind Swiss
+```
+
+## Ejemplo de Implementación Completa
+
+```tsx
+// Componente Swiss optimizado
+const SwissCard: React.FC<{title: string, content: string}> = ({ 
+  title, 
+  content 
+}) => (
+  <article className="
+    bg-white border border-gray-200 p-6
+    grid gap-4
+    font-sans text-left
+  ">
+    <h3 className="text-xl font-medium text-gray-900 tracking-tight">
+      {title}
+    </h3>
+    <p className="text-base text-gray-600 leading-relaxed">
+      {content}
+    </p>
+  </article>
+);
+```
+
+## Configuración Tailwind Swiss
+
+```js
+// tailwind.config.js - Configuración Swiss
+module.exports = {
+  theme: {
+    fontFamily: {
+      'sans': ['Inter', 'Helvetica', 'Arial', 'sans-serif'],
+    },
+    colors: {
+      white: '#ffffff',
+      gray: {
+        50: '#fafafa',
+        100: '#f5f5f5',
+        200: '#e5e5e5',
+        300: '#d4d4d4',
+        400: '#a3a3a3',
+        500: '#737373',
+        600: '#525252',
+        700: '#404040',
+        800: '#262626',
+        900: '#171717',
+      },
+      blue: {
+        600: '#2563eb',
+      },
+      red: {
+        600: '#dc2626',
+      }
+    },
+    spacing: {
+      '1': '0.25rem',
+      '2': '0.5rem', 
+      '3': '0.75rem',
+      '4': '1rem',
+      '6': '1.5rem',
+      '8': '2rem',
+      '12': '3rem',
+      '16': '4rem',
+    }
+  }
+}
+```
+
+---
+
+
+
+
+**Objetivo:** Cada componente debe reflejar los valores Swiss de funcionalidad, claridad y elegancia minimalista, utilizando Tailwind CSS para implementar estos principios de manera consistente y mantenible
