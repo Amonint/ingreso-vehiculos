@@ -37,7 +37,12 @@ export default function VehiclesTable({ vehicles, onDelete }: VehiclesTableProps
               <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Año
               </th>
-              
+              <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Precio
+              </th>
+              <th scope="col" className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                Acciones
+              </th>
             </tr>
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
@@ -65,7 +70,12 @@ export default function VehiclesTable({ vehicles, onDelete }: VehiclesTableProps
                 <td className="px-6 py-4 whitespace-nowrap">
                   <div className="text-sm text-gray-900">{vehicle.modelo}</div>
                 </td>
-               
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900">{vehicle.anio}</div>
+                </td>
+                <td className="px-6 py-4 whitespace-nowrap">
+                  <div className="text-sm text-gray-900">${vehicle.precio.toLocaleString()}</div>
+                </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div className="flex space-x-4">
                     <button
