@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { getAllVehicles, deleteVehicle, deleteVehicleImage } from './services/vehicleService';
-import { Vehicle } from './types/vehicle';
+import { getAllVehicles, deleteVehicle, deleteVehicleImage } from './vehicles/services/vehicleService';
+import { Vehicle } from './vehicles/types/Vehicle';
 import { signInWithEmailAndPassword, User } from 'firebase/auth';
 import { auth } from '../firebase/config';
 import { useRouter } from 'next/navigation';

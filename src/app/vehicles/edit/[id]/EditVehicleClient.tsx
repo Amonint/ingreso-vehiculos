@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getVehicleById, updateVehicle } from '../../../services/vehicleService';
-import { Vehicle } from '../../../types/vehicle';
-import VehicleForm from '../../../components/VehicleForm';
+import { getVehicleById, updateVehicle } from '../../services/vehicleService';
+import { Vehicle } from '../../types/Vehicle';
+import VehicleForm from '../../components/VehicleForm';
 
 export default function EditVehicleClient({ id }: { id: string }) {
   const router = useRouter();

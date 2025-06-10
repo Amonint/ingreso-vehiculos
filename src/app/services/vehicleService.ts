@@ -1,7 +1,7 @@
 import { collection, addDoc, updateDoc, deleteDoc, doc, getDocs, getDoc, query, orderBy } from 'firebase/firestore';
 import { ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 import { db, storage } from '../../firebase/config';
-import { Vehicle } from '../types/vehicle';
+import { Vehicle } from '../vehicles/types/Vehicle';
 
 const VEHICLES_COLLECTION = 'vehicles';
 

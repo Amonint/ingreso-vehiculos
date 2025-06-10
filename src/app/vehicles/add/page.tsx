@@ -2,9 +2,9 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import VehicleForm from '../../components/VehicleForm';
-import { addVehicle } from '../../services/vehicleService';
-import { Vehicle } from '../../types/vehicle';
+import VehicleForm from '../components/VehicleForm';
+import { addVehicle } from '../services/vehicleService';
+import { Vehicle } from '../types/Vehicle';
 
 export default function AddVehiclePage() {
   const router = useRouter();

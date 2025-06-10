@@ -15,15 +15,25 @@ export default function VehicleForm({ vehicle, onSubmit, isEditMode = false }: V
     vehicle || {
       marca: '',
       modelo: '',
-      anio: new Date().getFullYear(),
+      año: new Date().getFullYear().toString(),
       precio: 0,
-      kilometraje: 0,
       tipoVehiculo: 'sedan',
-      transmision: 'automatico',
-      combustible: 'gasolina',
       descripcion: '',
-      caracteristicas: [],
-      imagenPrincipal: '',
+      fichaTecnicaUrl: '',
+      coloresDisponibles: [],
+      caracteristicas: {
+        confort: { principal: '', adicionales: [] },
+        exterior: { principal: '', adicionales: [] },
+        seguridad: { principal: '', adicionales: [] },
+      },
+      especificaciones: {
+        consumo: { principal: '', adicionales: [] },
+        motor: { principal: '', adicionales: [] },
+        potencia: { principal: '', adicionales: [] },
+        transmision: { principal: '', adicionales: [] },
+      },
+      imagenBanner: '',
+      imagenTarjeta: '',
       imagenGaleria: [],
     }
   );
@@ -37,7 +47,7 @@ export default function VehicleForm({ vehicle, onSubmit, isEditMode = false }: V
     const { name, value } = e.target;
     setFormData(prev => ({
       ...prev,
-      [name]: name === 'precio' || name === 'kilometraje' ? Number(value) : value
+      [name]: name === 'precio' ? Number(value) : value
     }));
   };
 
@@ -79,18 +89,16 @@ export default function VehicleForm({ vehicle, onSubmit, isEditMode = false }: V
 
           {/* Año */}
           <div>
-            <label htmlFor="anio" className="block text-sm font-medium text-gray-700">
+            <label htmlFor="año" className="block text-sm font-medium text-gray-700">
               Año
             </label>
             <input
-              type="number"
-              name="anio"
-              id="anio"
-              value={formData.anio}
+              type="text"
+              name="año"
+              id="año"
+              value={formData.año}
               onChange={handleChange}
               required
-              min="1900"
-              max={new Date().getFullYear() + 1}
               className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
             />
           </div>
@@ -117,28 +125,6 @@ export default function VehicleForm({ vehicle, onSubmit, isEditMode = false }: V
             </div>
           </div>
 
-          {/* Kilometraje */}
-          <div>
-            <label htmlFor="kilometraje" className="block text-sm font-medium text-gray-700">
-              Kilometraje
-            </label>
-            <div className="mt-1 relative rounded-md shadow-sm">
-              <input
-                type="number"
-                name="kilometraje"
-                id="kilometraje"
-                value={formData.kilometraje}
-                onChange={handleChange}
-                required
-                min="0"
-                className="block w-full rounded-md border-gray-300 focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-              />
-              <div className="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none">
-                <span className="text-gray-500 sm:text-sm">km</span>
-              </div>
-            </div>
-          </div>
-
           {/* Tipo de Vehículo */}
           <div>
             <label htmlFor="tipoVehiculo" className="block text-sm font-medium text-gray-700">
@@ -156,42 +142,6 @@ export default function VehicleForm({ vehicle, onSubmit, isEditMode = false }: V
               <option value="pickup">Pickup</option>
               <option value="van">Van</option>
               <option value="deportivo">Deportivo</option>
-            </select>
-          </div>
-
-          {/* Transmisión */}
-          <div>
-            <label htmlFor="transmision" className="block text-sm font-medium text-gray-700">
-              Transmisión
-            </label>
-            <select
-              name="transmision"
-              id="transmision"
-              value={formData.transmision}
-              onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-            >
-              <option value="automatico">Automático</option>
-              <option value="manual">Manual</option>
-            </select>
-          </div>
-
-          {/* Combustible */}
-          <div>
-            <label htmlFor="combustible" className="block text-sm font-medium text-gray-700">
-              Combustible
-            </label>
-            <select
-              name="combustible"
-              id="combustible"
-              value={formData.combustible}
-              onChange={handleChange}
-              className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 sm:text-sm"
-            >
-              <option value="gasolina">Gasolina</option>
-              <option value="diesel">Diesel</option>
-              <option value="electrico">Eléctrico</option>
-              <option value="hibrido">Híbrido</option>
             </select>
           </div>
         </div>
@@ -223,7 +173,8 @@ export default function VehicleForm({ vehicle, onSubmit, isEditMode = false }: V
               setFormData(prev => ({
                 ...prev,
                 imagenGaleria: urls,
-                imagenPrincipal: urls[0] || ''
+                imagenBanner: urls[0] || '',
+                imagenTarjeta: urls[0] || ''
               }));
             }}
           />

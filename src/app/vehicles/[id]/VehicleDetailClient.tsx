@@ -2,9 +2,9 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { getVehicleById, deleteVehicle, deleteVehicleImage } from '../../services/vehicleService';
-import { Vehicle } from '../../types/vehicle';
-import VehicleDetail from '../../components/VehicleDetail';
+import { getVehicleById, deleteVehicle, deleteVehicleImage } from '../services/vehicleService';
+import { Vehicle } from '../types/Vehicle';
+import { VehicleDetails } from '../components/VehicleDetails';
 
 export default function VehicleDetailClient({ id }: { id: string }) {
   const router = useRouter();
@@ -80,9 +80,33 @@ export default function VehicleDetailClient({ id }: { id: string }) {
   }
 
   return vehicle ? (
-    <VehicleDetail
-      vehicle={vehicle}
-      onDelete={handleDeleteVehicle}
-    />
+    <div className="space-y-6">
+      {/* Header con botones de acción */}
+      <div className="flex justify-between items-center">
+        <button
+          onClick={() => router.push('/vehicles')}
+          className="text-blue-600 hover:text-blue-800 font-medium"
+        >
+          ← Volver a vehículos
+        </button>
+        <div className="flex space-x-4">
+          <button
+            onClick={() => router.push(`/vehicles/edit/${vehicle.id}`)}
+            className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors duration-150"
+          >
+            Editar
+          </button>
+          <button
+            onClick={() => handleDeleteVehicle(vehicle.id!)}
+            className="px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors duration-150"
+          >
+            Eliminar
+          </button>
+        </div>
+      </div>
+      
+      {/* Componente de detalles */}
+      <VehicleDetails vehicle={vehicle} />
+    </div>
   ) : null;
 } 

@@ -1,12 +1,18 @@
-import { getAllVehicles } from '../../../services/vehicleService';
+import { getAllVehicles } from '../../services/vehicleService';
 import EditVehicleClient from './EditVehicleClient';
 
-// Esta función le dice a Next.js qué páginas generar estáticamente
+// Esta función es requerida para páginas dinámicas con output: export
 export async function generateStaticParams() {
-  const vehicles = await getAllVehicles();
-  return vehicles.map((vehicle) => ({
-    id: vehicle.id,
-  }));
+  try {
+    const vehicles = await getAllVehicles();
+    return vehicles.map((vehicle) => ({
+      id: vehicle.id,
+    }));
+  } catch (error) {
+    // Si falla al obtener vehículos (ej: durante build), devolver array vacío
+    console.warn('No se pudieron obtener vehículos para generateStaticParams:', error);
+    return [];
+  }
 }
 
 export default function EditVehiclePage({ params }: { params: { id: string } }) {

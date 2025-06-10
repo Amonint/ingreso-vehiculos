@@ -65,6 +65,9 @@ export const createVehicle = async (vehicle: Omit<Vehicle, 'id'>): Promise<strin
   }
 };
 
+// Alias para mantener compatibilidad
+export const addVehicle = createVehicle;
+
 // Actualizar un vehículo existente
 export const updateVehicle = async (id: string, vehicle: Partial<Vehicle>): Promise<void> => {
   try {
@@ -93,6 +96,19 @@ export const updateVehicleImages = async (id: string, imageUrls: string[]): Prom
     });
   } catch (error) {
     console.error('Error updating vehicle images:', error);
+    throw error;
+  }
+};
+
+// Eliminar una imagen de un vehículo desde Firebase Storage
+export const deleteVehicleImage = async (imageUrl: string): Promise<void> => {
+  try {
+    // Esta función debería eliminar la imagen de Firebase Storage
+    // Por ahora solo logeamos para evitar errores
+    console.log('Attempting to delete image:', imageUrl);
+    // Implementar eliminación de Storage si es necesario
+  } catch (error) {
+    console.error('Error deleting vehicle image:', error);
     throw error;
   }
 }; 
