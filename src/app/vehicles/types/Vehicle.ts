@@ -5,28 +5,28 @@ interface FeatureSection {
 
 export interface Vehicle {
   id?: string;
-  año: string;
   marca: string;
   modelo: string;
+  año: string;
   tipoVehiculo: string;
   descripcion: string;
   precio: number;
   fichaTecnicaUrl?: string;
-  coloresDisponibles: string[];
+  imagenBanner: string;
+  imagenTarjeta: string;
+  imagenGaleria: string[];
+  especificaciones: {
+    motor: FeatureSection;
+    transmision: FeatureSection;
+    consumo: FeatureSection;
+    potencia: FeatureSection;
+  };
   caracteristicas: {
+    seguridad: FeatureSection;
     confort: FeatureSection;
     exterior: FeatureSection;
-    seguridad: FeatureSection;
   };
-  especificaciones: {
-    consumo: FeatureSection;
-    motor: FeatureSection;
-    potencia: FeatureSection;
-    transmision: FeatureSection;
-  };
-  imagenBanner: string; // URL de la imagen del banner
-  imagenTarjeta: string; // URL de la imagen de la tarjeta
-  imagenGaleria: string[]; // URLs de las imágenes de la galería
+  coloresDisponibles: string[];
   createdAt?: number;
   updatedAt?: number;
 } 
