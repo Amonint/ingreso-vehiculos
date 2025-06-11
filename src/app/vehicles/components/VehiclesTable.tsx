@@ -74,7 +74,9 @@ export default function VehiclesTable({ vehicles, onDelete }: VehiclesTableProps
                   <div className="text-sm text-gray-900">{vehicle.año}</div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap">
-                  <div className="text-sm text-gray-900">${vehicle.precio.toLocaleString()}</div>
+                  <div className="text-sm text-gray-900">
+                    ${vehicle.precio ? vehicle.precio.toLocaleString() : 'No disponible'}
+                  </div>
                 </td>
                 <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                   <div className="flex space-x-4">
